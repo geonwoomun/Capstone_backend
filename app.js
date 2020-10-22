@@ -14,9 +14,15 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 const app = express();
 
-const authRouter = require('./routes/auth');
+const memberRouter = require('./routes/member');
 const groupRouter = require('./routes/group');
 const categoryRouter = require('./routes/category');
+const declareRouter = require('./routes/declaration');
+const searchRouter = require('./routes/search');
+const recruitRouter = require('./routes/recruit');
+const qnaRouter = require('./routes/qna');
+const evaluteRouter = require('./routes/evaluate');
+const imageRouter = require('./routes/uploadFile');
 const indexRouter = require('./routes');
 
 app.use(cors());
@@ -59,9 +65,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 //   res.send('api 홈');
 // });
 
-app.use('/api/auth', authRouter);
-app.use('/api/group', groupRouter);
-app.use('/api/category', categoryRouter);
+app.use('/api/member', memberRouter);
+app.use('/api/groups', groupRouter);
+app.use('/api/categorys', categoryRouter);
+app.use('/api/declaration', declareRouter);
+app.use('/api/search', searchRouter);
+app.use('/api/recruits', recruitRouter);
+app.use('/api/qna', qnaRouter);
+app.use('/api/evaluation', evaluteRouter);
+app.use('/api/images', imageRouter);
 app.use('/api', indexRouter);
 
 // catch 404 and forward to error handler

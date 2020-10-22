@@ -4,10 +4,20 @@ module.exports = class MemberController {
   static async getMemberInfo(req, res) {
     const { memberId } = req.params;
     try {
-      const memberInfo = await Member.findOne(
-        { include: [{ model: PreferCategory }, { model: PreferLocation }] },
-        { where: { id: memberId } }
-      );
+      const memberInfo = await Member.findOne({
+        where: { id: memberId },
+        attributes: [
+          'id',
+          'email',
+          'name',
+          'isProved',
+          'gender',
+          'telephone',
+          'type',
+          'declareCount',
+        ],
+        include: [{ model: PreferCategory }, { model: PreferLocation }],
+      });
       delete memberInfo.password;
       res.status(200).json({ info: memberInfo });
     } catch (error) {
@@ -17,19 +27,17 @@ module.exports = class MemberController {
   }
 
   static async updateMemberInfo(req, res) {
-    const {
-      memberId,
-      name,
-      birthday,
-      gender,
-      email,
-      telephone,
-      profileImg,
-    } = req.body;
+    const { memberId, name, telephone, profileImg } = req.body;
 
     try {
+      const memberInfo = await Member.findOne({ where: { id: memberId } });
+
       await Member.update(
-        { name, birthday, gender, email, telephone, profileImg },
+        {
+          name: name || memberInfo.name,
+          telephone: telephone || memberInfo.telephone,
+          profileImg: profileImg || memberInfo.profileImg,
+        },
         {
           where: {
             id: memberId,
@@ -46,12 +54,13 @@ module.exports = class MemberController {
 
   static async updateCategory(req, res) {
     const { memberId, deleteCategorys, newCategorys } = req.body;
+    console.log(deleteCategorys, newCategorys);
     try {
       await Promise.all([
         PreferCategory.destroy({
           where: {
             memberId,
-            id: deleteCategorys,
+            detailCategoryId: deleteCategorys,
           },
         }),
         PreferCategory.bulkCreate(

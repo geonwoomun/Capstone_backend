@@ -42,5 +42,6 @@ module.exports = class Recruit extends Sequelize.Model {
       foreignKey: 'groupMemberId',
       targetKey: 'id',
     });
+    this.hasMany(db.Qna, { foreignKey: 'recruitId', sourceKey: 'id' });
   }
 };

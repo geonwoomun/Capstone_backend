@@ -3,17 +3,13 @@ const router = express.Router();
 const { isLoggedIn } = require('../middlewares');
 const GroupMemberController = require('../controllers/groupMemberController');
 
-router.post('/apply-group', isLoggedIn, GroupMemberController.createApplyGroup);
-router.post('/join-group', isLoggedIn, GroupMemberController.createJoinGroup);
-router.post(
-  '/prefer-group',
-  isLoggedIn,
-  GroupMemberController.createPreferGroup
-);
-router.delete(
-  '/prefer-group',
-  isLoggedIn,
-  GroupMemberController.deletePreferGroup
-);
+router.get('/apply-member/:groupId', GroupMemberController.getApplyMember);
+router.get('/apply-group/:memberId', GroupMemberController.getApplyGroup);
+router.post('/apply-group', GroupMemberController.createApplyGroup);
+router.post('/join-group', GroupMemberController.createJoinGroup);
+router.get('/prefer-group/:memberId', GroupMemberController.getPreferGroup);
+router.put('/prefer-group', GroupMemberController.updatePreferGroup);
+router.post('/prefer-group', GroupMemberController.createPreferGroup);
+router.delete('/prefer-group', GroupMemberController.deletePreferGroup);
 
 module.exports = router;

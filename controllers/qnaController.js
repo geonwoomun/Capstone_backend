@@ -1,14 +1,23 @@
-const { Qna } = require('../models/recruit');
+const { Qna, Recruit } = require('../models/recruit');
+const { Member } = require('../models/member');
 
 module.exports = class QnaController {
   static async getQnas(req, res) {
-    const { groupId } = req.params;
+    const { recruitId } = req.params;
 
     try {
       const qnas = await Qna.findAll({
         where: {
-          groupId,
+          recruitId,
         },
+        attributes: ['id', 'title', 'contents', 'isSecret', 'type'],
+        include: [
+          {
+            model: Recruit,
+            attributes: ['id', 'title', 'contents', 'deadLine'],
+          },
+          { model: Member, attributes: ['id', 'email', 'name'] },
+        ],
       });
       res.status(200).json({ qnas });
     } catch (error) {
@@ -19,7 +28,7 @@ module.exports = class QnaController {
 
   static async createQna() {
     const {
-      groupId,
+      recruitId,
       memberId,
       title,
       contents,
@@ -30,8 +39,8 @@ module.exports = class QnaController {
 
     try {
       await Qna.create({
-        groupId,
         memberId,
+        recruitId,
         title,
         contents,
         isSecret,
@@ -39,7 +48,7 @@ module.exports = class QnaController {
         topQnaId,
       });
 
-      res.status(200).json({ message: 'QNA 작성 되었습니다.' });
+      res.status(200).json({ message: 'QNA가 작성되었습니다.' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });

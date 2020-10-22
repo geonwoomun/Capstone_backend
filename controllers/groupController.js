@@ -1,14 +1,34 @@
-const Group = require('../models/group/group');
-const ActiveTime = require('../models/group/activeTime');
-const Skill = require('../models/group/activeTime');
-const GroupImage = require('../models/group/activeTime');
+const {
+  ActiveTime,
+  Group,
+  GroupImage,
+  Skill,
+  ActiveCategory,
+} = require('../models/group');
+const { DetailCategory } = require('../models/category');
+const { JoinGroup } = require('../models/groupMember');
+const { Op } = require('sequelize');
 // 그룹 관련된 이미지랑, 스킬, 해시태그, 활동시간 등을 같이 준다고 하면...
 // bulkcreate
 
 module.exports = class GroupController {
-  static async getGroup(req, res) {
+  static async getGroups(req, res) {
     try {
-      const groups = await Group.findAll();
+      const groups = await Group.findAll({
+        attributes: ['id', 'name', 'memberCount', 'groupIntro'],
+        include: [
+          { model: Skill, attributes: ['id', 'name'] },
+          {
+            model: ActiveTime,
+            attributes: ['id', 'activeDay', 'startTime', 'endTime'],
+          },
+          { model: GroupImage, attributes: ['id', 'URL', 'description'] },
+          {
+            model: ActiveCategory,
+            include: [{ model: DetailCategory, attributes: ['id', 'name'] }],
+          },
+        ],
+      });
 
       res.status(200).json({ groups });
     } catch (error) {
@@ -17,13 +37,45 @@ module.exports = class GroupController {
     }
   }
 
+  static async getGroup(req, res) {
+    const { groupId } = req.params;
+    try {
+      const group = await Group.findOne({
+        where: {
+          id: groupId,
+        },
+        attributes: ['id', 'name', 'memberCount', 'groupIntro'],
+        include: [
+          { model: Skill, attributes: ['id', 'name'] },
+          {
+            model: ActiveTime,
+            attributes: ['id', 'activeDay', 'startTime', 'endTime'],
+          },
+          { model: GroupImage, attributes: ['id', 'URL', 'description'] },
+          {
+            model: ActiveCategory,
+            include: [{ model: DetailCategory, attributes: ['id', 'name'] }],
+          },
+        ],
+      });
+
+      res.status(200).json({ group });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
+    }
+  }
+
   static async createGroup(req, res) {
     const {
+      memberId,
       groupName,
       groupIntro,
-      activeTimes,
-      skills,
-      groupImages,
+      activeTimes = [],
+      location,
+      skills = [],
+      groupImages = [],
+      detailCategoryId = [],
     } = req.body;
     try {
       const isExistGroup = await Group.findOne({ where: { name: groupName } });
@@ -33,22 +85,37 @@ module.exports = class GroupController {
 
       const groupData = await Group.create({
         name: groupName,
+        location,
         groupIntro,
+        memberCount: 1,
       });
 
       // 활동시간, 스킬, 그룹이미지
-      await ActiveTime.bulkCreate(
-        activeTimes.map((time) => ({ ...time, groupId: groupData.id }))
-      );
-      await Skill.bulkCreate(
-        skills.map((skill) => ({ ...skill, groupId: groupData.id }))
-      );
-      await GroupImage.bulkCreate(
-        groupImages.map((groupImage) => ({
-          ...groupImage,
+      await Promise.all([
+        await ActiveTime.bulkCreate(
+          activeTimes.map((time) => ({ ...time, groupId: groupData.id }))
+        ),
+        await Skill.bulkCreate(
+          skills.map((skill) => ({ ...skill, groupId: groupData.id }))
+        ),
+        await GroupImage.bulkCreate(
+          groupImages.map((groupImage) => ({
+            ...groupImage,
+            groupId: groupData.id,
+          }))
+        ),
+        await JoinGroup.create({
+          position: 'L',
           groupId: groupData.id,
-        }))
-      );
+          memberId,
+        }),
+        await ActiveCategory.bulkCreate(
+          detailCategoryId.map((id) => ({
+            detailCategoryId: id,
+            groupId: groupData.id,
+          }))
+        ),
+      ]);
 
       res.status(201).json({ message: '그룹이 생성 되었습니다.' });
     } catch (error) {
@@ -60,35 +127,61 @@ module.exports = class GroupController {
   static async updateGroup(req, res) {
     const {
       groupId,
-      userId,
+      memberId,
       groupName,
       groupIntro,
-      groupImages,
-      activeTimes,
-      skills,
-      deleteGroupImages,
-      deleteActiveTimes,
-      deleteSkiils,
+      groupImages = [],
+      activeTimes = [],
+      skills = [],
+      deleteGroupImagesId = [],
+      deleteActiveTimesId = [],
+      deleteSkillsId = [],
     } = req.body;
 
     // 유저가 groupId의 팀장이 아니면 패스.
     try {
-      await Group.update({ groupName, groupIntro }, { where: groupId, userId });
+      const isLeader = await JoinGroup.findOne({
+        where: { groupId, memberId, position: 'L' },
+      });
+
+      if (!isLeader) {
+        return res.status(400).json({ message: '그룹장이 아닙니다.' });
+      }
+
+      const groupInfo = await Group.findOne({ where: { id: groupId } });
+      await Group.update(
+        {
+          groupName: groupName || groupInfo.groupName,
+          groupIntro: groupIntro || groupInfo.groupIntro,
+        },
+        { where: { id: groupId } }
+      );
 
       await Promise.all([
         GroupImage.destroy({
-          where: { $in: deleteGroupImages.map((groupImage) => groupImage.id) },
+          where: {
+            groupId,
+            id: {
+              [Op.in]: deleteGroupImagesId,
+            },
+          },
         }),
         ActiveTime.destroy({
-          where: { $in: deleteActiveTimes.map((activeTime) => activeTime.id) },
+          where: {
+            groupId,
+            id: {
+              [Op.in]: deleteActiveTimesId,
+            },
+          },
         }),
         Skill.destroy({
-          where: { $in: deleteSkiils.map((skill) => skill.id) },
+          where: {
+            groupId,
+            id: {
+              [Op.in]: deleteSkillsId,
+            },
+          },
         }),
-      ]);
-
-      // 병렬적으로 가능?
-      await Promise.all([
         ActiveTime.bulkCreate(
           activeTimes.map((time) => ({ ...time, groupId }))
         ),
@@ -106,11 +199,21 @@ module.exports = class GroupController {
   }
 
   static async deleteGroup(req, res) {
-    const { groupId } = req.params;
+    const { groupId, memberId } = req.query;
 
     try {
-      await Group.destroy({ where: { id: groupId } });
+      const isLeader = await JoinGroup.findOne({
+        where: { groupId, memberId, position: 'L' },
+      });
 
+      if (!isLeader) {
+        return res.status(400).json({ message: '그룹장이 아닙니다.' });
+      }
+
+      await Promise.all([
+        await Group.destroy({ where: { id: groupId } }),
+        await JoinGroup.destroy({ where: { groupId, memberId } }),
+      ]);
       res.status(200).json({ message: '그룹이 삭제되었습니다.' });
     } catch (error) {
       console.error(error);

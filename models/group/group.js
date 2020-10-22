@@ -18,6 +18,10 @@ module.exports = class Group extends Sequelize.Model {
           type: Sequelize.TEXT,
           allowNull: true,
         },
+        location: {
+          type: Sequelize.STRING(150),
+          allowNull: true,
+        },
       }, // 가입일자, 탈퇴일자 추가
       {
         sequelize,
@@ -36,5 +40,6 @@ module.exports = class Group extends Sequelize.Model {
     this.hasMany(db.ActiveTime, { foreignKey: 'groupId', sourceKey: 'id' });
     this.hasMany(db.GroupImage, { foreignKey: 'groupId', sourceKey: 'id' });
     this.hasMany(db.Skill, { foreignKey: 'groupId', sourceKey: 'id' });
+    this.hasMany(db.ActiveCategory, { foreignKey: 'groupId', sourceKey: 'id' });
   }
 };

@@ -31,7 +31,7 @@ module.exports = class JoinGroup extends Sequelize.Model {
       targetKey: 'id',
     });
     this.hasMany(db.Recruit, {
-      foreignKey: 'groupMemeberId',
+      foreignKey: 'groupMemberId',
       sourceKey: 'id',
     });
   }

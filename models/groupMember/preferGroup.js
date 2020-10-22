@@ -11,6 +11,7 @@ module.exports = class PreferGroup extends Sequelize.Model {
           //선호
           type: Sequelize.BOOLEAN,
           allowNull: false,
+          defaultValue: true,
         },
       }, // 가입일자, 탈퇴일자 추가
       {

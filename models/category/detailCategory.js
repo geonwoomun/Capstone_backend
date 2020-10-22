@@ -35,5 +35,10 @@ module.exports = class DetailCategory extends Sequelize.Model {
       foreignKey: 'detailCategoryId',
       sourceKey: 'id',
     });
+
+    this.hasMany(db.ActiveCategory, {
+      foreignKey: 'detailCategoryId',
+      sourceKey: 'id',
+    });
   }
 };

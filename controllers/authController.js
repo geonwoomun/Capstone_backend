@@ -22,7 +22,7 @@ module.exports = class AuthController {
       return res.status(201).json({ message: '회원가입 성공' });
     } catch (error) {
       console.error(error);
-      return next(error);
+      return res.status(500).json({ message: '서버에러 입니다.' });
     }
   }
 
@@ -40,16 +40,47 @@ module.exports = class AuthController {
       return req.login(member, (loginError) => {
         if (loginError) {
           console.error(loginError);
-          return next(loginError);
+          return res.status(500).json({ message: '서버 에러입니다.' });
         }
         return res.status(200).json({ message: '로그인 성공' });
       });
-    })(req, res, next);
+    })(req, res);
   }
 
   static async logoutMember(req, res) {
     req.logout();
     req.session.destroy();
+    res.clearCookie('connect.sid');
     res.status(200).json({ message: '로그아웃 성공' });
+  }
+
+  static async deleteMember(req, res) {
+    const { email, password } = req.body;
+    try {
+      const user = await Member.findOne({ where: { email } });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ message: '아이디 또는 비밀번호가 틀렸습니다.' });
+      }
+
+      const result = await bcrypt.compare(password, user.password);
+      if (!result) {
+        return res
+          .status(400)
+          .json({ message: '아이디 또는 비밀번호가 틀렸습니다.' });
+      }
+
+      await Member.destroy({
+        where: {
+          email,
+        },
+      });
+
+      return res.status(200).json({ message: '회원탈퇴 성공' });
+    } catch (error) {
+      console.error(error);
+      return next(error);
+    }
   }
 };

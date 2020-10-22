@@ -2,12 +2,18 @@ const Sequelize = require('sequelize');
 const { Member, PreferCategory, PreferLocation } = require('./member');
 // const PreferCategory = require('./member/preferCategory');
 // const PreferLocation = require('./member/preferLocation');
-const { Group, ActiveTime, GroupImage, Skill } = require('./group');
+const {
+  Group,
+  ActiveTime,
+  GroupImage,
+  Skill,
+  ActiveCategory,
+} = require('./group');
 const { Evaluate, EvaluateDeclaration } = require('./evaluate');
 const { ApplyGroup, JoinGroup, PreferGroup } = require('./groupMember');
 const { Qna, Recruit } = require('./recruit');
 const { Category, DetailCategory } = require('./category');
-// const{ } = require('./declaration');
+const { Declaration } = require('./declaration');
 
 const env = process.env.NODE_ENV || 'development';
 const config = require('../config/config.json')[env];
@@ -37,6 +43,8 @@ const db = {
   Recruit,
   Category,
   DetailCategory,
+  Declaration,
+  ActiveCategory,
 };
 
 const Models = Object.keys(db);

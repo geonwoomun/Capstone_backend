@@ -1,4 +1,4 @@
-const { Op } = require('sequelize/types');
+const { Op } = require('sequelize');
 const { Group } = require('../models/group');
 
 module.exports = class SearchController {
@@ -12,6 +12,7 @@ module.exports = class SearchController {
             [Op.like]: `${groupName}%`,
           },
         },
+        attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
       });
 
       res.status(200).json({ groups });

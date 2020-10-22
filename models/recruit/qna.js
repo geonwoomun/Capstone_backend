@@ -40,7 +40,7 @@ module.exports = class Qna extends Sequelize.Model {
   }
 
   static associate(db) {
-    this.belongsTo(db.Group, { foreignKey: 'groupId', targetKey: 'id' });
+    this.belongsTo(db.Recruit, { foreignKey: 'recruitId', targetKey: 'id' });
     this.belongsTo(db.Member, { foreignKey: 'memberId', targetKey: 'id' });
     this.hasMany(db.Qna, { foreignKey: 'topQnaId', sourceKey: 'id' });
   }

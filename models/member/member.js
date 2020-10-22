@@ -22,6 +22,10 @@ module.exports = class Member extends Sequelize.Model {
           allowNull: false,
           defaultValue: false,
         },
+        profileImg: {
+          type: Sequelize.STRING(150),
+          allowNull: true,
+        },
         gender: {
           type: Sequelize.BOOLEAN,
           allowNull: false,
@@ -45,20 +49,14 @@ module.exports = class Member extends Sequelize.Model {
           type: Sequelize.STRING(30),
           allowNull: true,
         },
-        createdAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
-          defaultValue: Sequelize.NOW,
-        },
-      }, // 가입일자, 탈퇴일자 추가
-
+      },
       {
         sequelize,
-        timestamps: false,
+        timestamps: true,
         underscored: false,
         modelName: 'Member',
         tableName: 'members',
-        paranoid: false,
+        paranoid: true,
         charset: 'utf8',
         collate: 'utf8_general_ci',
       }
@@ -75,6 +73,18 @@ module.exports = class Member extends Sequelize.Model {
       sourceKey: 'id',
     });
     this.hasMany(db.Qna, {
+      foreignKey: 'memberId',
+      sourceKey: 'id',
+    });
+    this.hasMany(db.PreferGroup, {
+      foreignKey: 'memberId',
+      sourceKey: 'id',
+    });
+    this.hasMany(db.JoinGroup, {
+      foreignKey: 'memberId',
+      sourceKey: 'id',
+    });
+    this.hasMany(db.ApplyGroup, {
       foreignKey: 'memberId',
       sourceKey: 'id',
     });

@@ -6,6 +6,14 @@ module.exports = class ApplyGroup extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
+        portfolio: {
+          type: Sequelize.TEXT,
+          allowNull: true,
+        },
+        activityPeriod: {
+          type: Sequelize.STRING(100),
+          allowNull: false,
+        },
         applyDate: {
           type: Sequelize.DATE,
           allowNull: false,
@@ -13,8 +21,8 @@ module.exports = class ApplyGroup extends Sequelize.Model {
         },
         approvalCheck: {
           type: Sequelize.BOOLEAN,
-          allowNull: false,
-          defaultValue: false,
+          allowNull: true,
+          defaultValue: null,
         },
       },
       {
