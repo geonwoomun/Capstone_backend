@@ -25,7 +25,12 @@ const evaluteRouter = require('./routes/evaluate');
 const imageRouter = require('./routes/uploadFile');
 const indexRouter = require('./routes');
 
-app.use(cors());
+const corsOptions = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 // require('./config/passport');
 const sequelize = require('./models');
 
