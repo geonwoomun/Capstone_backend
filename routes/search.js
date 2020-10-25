@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const searchController = require('../controllers/searchController');
 
-router.get('/:groupName', searchController.searchByName);
+router.get('/group/:groupName', searchController.searchGroupName);
+router.get('/recruit/:recruitName', searchController.searchRecruitName);
 
 module.exports = router;

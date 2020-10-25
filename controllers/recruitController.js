@@ -1,5 +1,13 @@
 const { Recruit, Qna } = require('../models/recruit');
-
+const {
+  Group,
+  ActiveCategory,
+  ActiveTime,
+  GroupImage,
+  Skill,
+} = require('../models/group');
+const { DetailCategory } = require('../models/category');
+const { JoinGroup } = require('../models/groupMember');
 module.exports = class RecruitController {
   static async getRecruits(req, res) {
     const { groupId } = req.params;
@@ -26,17 +34,60 @@ module.exports = class RecruitController {
         where: {
           id: recruitId,
         },
+        attributes: [
+          'id',
+          'title',
+          'contents',
+          'deadline',
+          'expectMemberCount',
+        ],
+        include: [
+          {
+            model: JoinGroup,
+            attributes: ['id', 'position'],
+            include: [
+              {
+                model: Group,
+                attributes: [
+                  'id',
+                  'name',
+                  'memberCount',
+                  'groupIntro',
+                  'location',
+                ],
+                include: [
+                  {
+                    model: ActiveCategory,
+                    attributes: ['id'],
+                    include: [
+                      { model: DetailCategory, attributes: ['id', 'name'] },
+                    ],
+                  },
+                  { model: Skill, attributes: ['id', 'name'] },
+                  {
+                    model: GroupImage,
+                    attributes: ['id', 'URL', 'description'],
+                  },
+                  {
+                    model: ActiveTime,
+                    attributes: ['id', 'activeDay', 'startTime', 'endTime'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
 
       res.status(200).json({ recruit });
     } catch (error) {
-      console.error(erorr);
+      console.error(error);
       res.status(500).json({ message: '서버 에러 입니다.' });
     }
   }
 
   static async createRecruit(req, res) {
-    const { title, contents, deadline } = req.body;
+    const { title, contents, deadline, expectMemberCount } = req.body;
 
     const [years, hours] = deadline.split(' ');
     const [year, month, day] = years.split('-');
@@ -45,6 +96,7 @@ module.exports = class RecruitController {
       await Recruit.create({
         title,
         contents,
+        expectMemberCount,
         deadLine: new Date(
           year,
           month - 1,
@@ -67,11 +119,11 @@ module.exports = class RecruitController {
   }
 
   static async updateRecruit(req, res) {
-    const { recruitId, title, contents } = req.body;
+    const { recruitId, title, contents, expectMemberCount } = req.body;
 
     try {
       await Recruit.update(
-        { title, contents },
+        { title, contents, expectMemberCount },
         {
           where: {
             id: recruitId,

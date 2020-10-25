@@ -9,6 +9,10 @@ module.exports = class Group extends Sequelize.Model {
           unique: true,
           allowNull: false,
         },
+        maxMember: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
         memberCount: {
           type: Sequelize.INTEGER,
           allowNull: false,

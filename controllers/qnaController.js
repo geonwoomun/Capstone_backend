@@ -26,7 +26,7 @@ module.exports = class QnaController {
     }
   }
 
-  static async createQna() {
+  static async createQna(req, res) {
     const {
       recruitId,
       memberId,
@@ -55,7 +55,7 @@ module.exports = class QnaController {
     }
   }
 
-  static async deleteQna() {
+  static async deleteQna(req, res) {
     const { qnaId } = req.params;
 
     try {

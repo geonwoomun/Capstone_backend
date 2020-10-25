@@ -1,4 +1,4 @@
-const { Evaluate } = require('../models/evaluate');
+const { Evaluate, EvaluateDeclaration } = require('../models/evaluate');
 const sequelize = require('../models');
 const { QueryTypes } = require('sequelize');
 module.exports = class EvaluationController {
@@ -68,6 +68,37 @@ module.exports = class EvaluationController {
       });
 
       res.status(200).json({ message: '평가 삭제가 완료 되었습니다.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
+    }
+  }
+
+  static async getEvaluateDeclaration(req, res) {
+    const { evaluateId } = req.params;
+    try {
+      const declarations = await EvaluateDeclaration.findAll({
+        where: {
+          evaluateId,
+        },
+      });
+
+      res.status(200).json({ declarations });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
+    }
+  }
+
+  static async createEvaluateDeclaration(req, res) {
+    const { reason, memberId } = req.body;
+    try {
+      await EvaluateDeclaration.create({
+        reason,
+        memberId,
+      });
+
+      res.status(200).json({ message: '평가 신고가 완료 되었습니다.' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });

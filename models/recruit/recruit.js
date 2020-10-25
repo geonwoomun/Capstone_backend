@@ -18,6 +18,10 @@ module.exports = class Recruit extends Sequelize.Model {
         deadLine: {
           type: Sequelize.DATE,
         },
+        expectMemberCount: {
+          type: Sequelize.STRING(500),
+          allowNull: false,
+        },
         createdAt: {
           type: Sequelize.DATE,
           allowNull: false,

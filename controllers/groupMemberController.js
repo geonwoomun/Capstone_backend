@@ -8,9 +8,18 @@ const sequelize = require('../models');
 
 module.exports = class GroupMemberController {
   static async getJoinGroup(req, res) {
-    const { userId } = req.params;
+    const { memberId } = req.params;
     try {
-      const groups = await JoinGroup.findAll({ where: { userId } });
+      const groups = await JoinGroup.findAll({
+        where: { memberId },
+        attributes: ['id', 'position', 'createdAt'],
+        include: [
+          {
+            model: Group,
+            attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+          },
+        ],
+      });
 
       res.status(200).json({ groups });
     } catch (error) {
@@ -20,13 +29,47 @@ module.exports = class GroupMemberController {
   }
 
   static async createJoinGroup(req, res) {
-    const { userId, groupId } = req.body;
+    const { applyId, memberId } = req.body;
 
     try {
-      await JoinGroup.create({
-        userId,
-        groupId,
+      const applyInfo = await ApplyGroup.findOne({
+        where: {
+          id: applyId,
+          approvalCheck: null,
+        },
       });
+
+      if (!applyInfo) {
+        return res.status(400).json({ message: '지원서가 없습니다.' });
+      }
+
+      const isLeader = await JoinGroup.findOne({
+        where: {
+          memberId,
+          groupId: applyInfo.groupId,
+        },
+      });
+
+      if (!isLeader)
+        return res.status(400).json({ message: '그룹장이 아닙니다.' });
+
+      await Promise.all([
+        await ApplyGroup.update(
+          {
+            approvalCheck: true,
+          },
+          {
+            where: {
+              id: applyId,
+            },
+          }
+        ),
+        await JoinGroup.create({
+          memberId: applyInfo.memberId,
+          groupId: applyInfo.groupId,
+          position: 'N',
+        }),
+      ]);
 
       // 가입 되면서 지원서 승인 여부 ok로 바꿔줌.
       res.status(200).json({ message: '그룹에 가입 되었습니다.' });
@@ -37,8 +80,18 @@ module.exports = class GroupMemberController {
   }
 
   static async deleteJoinGroup(req, res) {
-    const { memberId, groupId } = req.query;
+    const { groupId, leaderId, memberId } = req.query;
+
     try {
+      const isLeader = await JoinGroup.findOne({
+        where: {
+          memberId: leaderId,
+          position: 'L',
+        },
+      });
+      if (leaderId && !isLeader)
+        return res.status(400).json({ message: '그룹장이 아닙니다.' });
+
       await JoinGroup.destroy({
         where: {
           memberId,
@@ -122,6 +175,41 @@ module.exports = class GroupMemberController {
       res.status(500).json({ message: '서버 에러입니다.' });
     }
   }
+
+  static async rejectApplyMember(req, res) {
+    const { applyId, groupId, memberId } = req.body;
+
+    try {
+      const isLeader = await JoinGroup.findOne({
+        where: {
+          memberId,
+          groupId,
+          position: 'L',
+        },
+      });
+
+      if (!isLeader) {
+        return res.status(400).json({ message: '그룹장이 아닙니다.' });
+      }
+
+      await ApplyGroup.update(
+        {
+          approvalCheck: false,
+        },
+        {
+          where: {
+            id: applyId,
+          },
+        }
+      );
+
+      res.status(200).json({ message: '가입 신청이 거절 되었습니다.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
+    }
+  }
+
   static async getPreferGroup(req, res) {
     const { memberId } = req.params;
 

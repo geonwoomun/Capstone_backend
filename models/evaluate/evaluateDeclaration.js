@@ -27,7 +27,11 @@ module.exports = class EvaluateDeclaration extends Sequelize.Model {
 
   static associate(db) {
     this.belongsTo(db.Evaluate, {
-      foreignKey: 'detailCategoryId',
+      foreignKey: 'evaluateId',
+      targetKey: 'id',
+    });
+    this.belongsTo(db.Member, {
+      foreignKey: 'memberId',
       targetKey: 'id',
     });
   }

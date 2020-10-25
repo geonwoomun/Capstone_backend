@@ -7,17 +7,20 @@ module.exports = class DeclareController {
 
       if (memberId)
         declartions = await Declaration.findAll({
-          where: { targetMemberId: memberId },
-        });
-      if (recruitId)
-        declartions = await Declaration.findAll({
-          where: { targetRecruitId: recruitId },
+          where: { memberId },
+          attributes: ['id', 'title', 'contents', 'contentsType', 'createdAt'],
         });
 
-      return res.status(200).json({ declartions });
+      if (recruitId)
+        declartions = await Declaration.findAll({
+          where: { recruitId },
+          attributes: ['id', 'title', 'contents', 'contentsType', 'createdAt'],
+        });
+
+      res.status(200).json({ declartions });
     } catch (error) {
       console.error(error);
-      return next(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
     }
   }
 
@@ -26,25 +29,25 @@ module.exports = class DeclareController {
       title,
       contents,
       contentsType,
-      targetType,
       declarorId,
-      targetRecruitId,
-      taregtMemberId,
+      recruitId,
+      memberId,
     } = req.body;
+
     try {
       await Declaration.create({
         title,
         contents,
         contentsType,
-        targetType,
+        targetType: recruitId ? 'R' : 'M',
         declarorId,
-        targetRecruitId,
-        taregtMemberId,
+        recruitId,
+        memberId,
       });
       return res.status(200).json({ message: '신고 되었습니다.' });
     } catch (error) {
       console.error(error);
-      return next(error);
+      res.status(500).json({ message: '서버 에러입니다.' });
     }
   }
 };

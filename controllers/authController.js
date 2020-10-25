@@ -4,7 +4,7 @@ const Member = require('../models/member/member');
 
 module.exports = class AuthController {
   static async joinMember(req, res) {
-    const { email, name, password, telephone, gender } = req.body;
+    const { email, name, password, telephone, gender, birthday } = req.body;
     try {
       const exUser = await Member.findOne({ where: { email } });
       if (exUser) {
@@ -18,6 +18,7 @@ module.exports = class AuthController {
         password: hashPassword,
         telephone,
         gender,
+        birthday,
       });
       return res.status(201).json({ message: '회원가입 성공' });
     } catch (error) {
@@ -42,7 +43,30 @@ module.exports = class AuthController {
           console.error(loginError);
           return res.status(500).json({ message: '서버 에러입니다.' });
         }
-        return res.status(200).json({ message: '로그인 성공' });
+        const {
+          id,
+          email,
+          name,
+          birthday,
+          declareCount,
+          isProved,
+          telephone,
+          gender,
+        } = member;
+
+        return res.status(200).json({
+          message: '로그인 성공',
+          info: {
+            id,
+            email,
+            name,
+            birthday,
+            declareCount,
+            isProved,
+            telephone,
+            gender: gender ? '여자' : '남자',
+          },
+        });
       });
     })(req, res);
   }

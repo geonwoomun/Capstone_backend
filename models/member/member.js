@@ -40,6 +40,10 @@ module.exports = class Member extends Sequelize.Model {
           allowNull: false,
           defaultValue: 'local',
         },
+        birthday: {
+          type: Sequelize.DATEONLY,
+          allowNull: true,
+        },
         declareCount: {
           type: Sequelize.INTEGER,
           allowNull: false,
@@ -85,6 +89,14 @@ module.exports = class Member extends Sequelize.Model {
       sourceKey: 'id',
     });
     this.hasMany(db.ApplyGroup, {
+      foreignKey: 'memberId',
+      sourceKey: 'id',
+    });
+    this.hasMany(db.Declaration, {
+      foreignKey: 'memberId',
+      sourceKey: 'id',
+    });
+    this.hasMany(db.EvaluateDeclaration, {
       foreignKey: 'memberId',
       sourceKey: 'id',
     });

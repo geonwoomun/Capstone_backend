@@ -71,6 +71,7 @@ module.exports = class GroupController {
       memberId,
       groupName,
       groupIntro,
+      maxMember,
       activeTimes = [],
       location,
       skills = [],
@@ -87,6 +88,7 @@ module.exports = class GroupController {
         name: groupName,
         location,
         groupIntro,
+        maxMember,
         memberCount: 1,
       });
 
