@@ -7,6 +7,6 @@ router.get('/detail', CategoryController.getDetailCategorys);
 router.get('/:categoryId', CategoryController.getDetailCategory);
 
 router.post('/', CategoryController.createCategory);
-router.post('/detial', CategoryController.createDetailCategory);
+router.post('/detail', CategoryController.createDetailCategory);
 
 module.exports = router;

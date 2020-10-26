@@ -54,7 +54,6 @@ module.exports = class MemberController {
 
   static async updateCategory(req, res) {
     const { memberId, deleteCategorys, newCategorys } = req.body;
-    console.log(deleteCategorys, newCategorys);
     try {
       await Promise.all([
         PreferCategory.destroy({
