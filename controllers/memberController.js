@@ -53,7 +53,7 @@ module.exports = class MemberController {
   }
 
   static async updateCategory(req, res) {
-    const { memberId, deleteCategorys, newCategorys } = req.body;
+    const { memberId, deleteCategorys = [], newCategorys = [] } = req.body;
     try {
       await Promise.all([
         PreferCategory.destroy({
@@ -80,7 +80,7 @@ module.exports = class MemberController {
   }
 
   static async updateLocation() {
-    const { memberId, deleteLocations, locationAddresses } = req.body;
+    const { memberId, deleteLocations = [], locationAddresses = [] } = req.body;
     try {
       await Promise.all([
         PreferLocation.destroy({
