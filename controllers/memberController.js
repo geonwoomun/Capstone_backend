@@ -4,6 +4,7 @@ module.exports = class MemberController {
   static async getMyInfo(req, res) {
     try {
       if (!req.user) return res.status(200).json(null);
+      console.log(req.user);
       const myInfo = await Member.findOne({
         where: { id: req.user.id },
         attributes: {
