@@ -1,6 +1,23 @@
 const { Member, PreferCategory, PreferLocation } = require('../models/member');
 
 module.exports = class MemberController {
+  static async getMyInfo(req, res) {
+    try {
+      if (!req.user) return res.status(200).json(null);
+      const myInfo = await Member.findOne({
+        where: { id: req.user.id },
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt', 'deletedAt'],
+        },
+        include: [{ model: PreferCategory }, { model: PreferLocation }],
+      });
+
+      res.status(200).json({ info: myInfo });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러 입니다.' });
+    }
+  }
   static async getMemberInfo(req, res) {
     const { memberId } = req.params;
     try {

@@ -31,7 +31,9 @@ module.exports = class AuthController {
     passport.authenticate('local', (authError, member, info) => {
       if (authError) {
         console.error(authError);
-        return next(authError);
+        return res
+          .status(400)
+          .json({ message: '로그인 정보가 잘 못 되었습니다.' });
       }
 
       if (!member) {
@@ -52,6 +54,7 @@ module.exports = class AuthController {
           isProved,
           telephone,
           gender,
+          profileImg,
         } = member;
 
         return res.status(200).json({
@@ -64,6 +67,7 @@ module.exports = class AuthController {
             declareCount,
             isProved,
             telephone,
+            profileImg,
             gender: gender ? '여자' : '남자',
           },
         });

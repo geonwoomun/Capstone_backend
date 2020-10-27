@@ -10,8 +10,9 @@ router.delete('/logout', isLoggedIn, AuthController.logoutMember);
 router.patch('/', isLoggedIn, AuthController.deleteMember);
 
 // /member
-router.put('/', MemberController.updateMemberInfo);
+router.get('/', MemberController.getMyInfo);
 router.get('/:memberId', MemberController.getMemberInfo);
+router.put('/', MemberController.updateMemberInfo);
 router.put('/category', MemberController.updateCategory);
 router.put('/location', MemberController.updateLocation);
 
