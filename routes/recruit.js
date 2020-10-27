@@ -3,7 +3,7 @@ const router = express.Router();
 const RecruitController = require('../controllers/recruitController');
 
 router.get('/:recruitId', RecruitController.getRecruit);
-router.get('/:categoryId', RecruitController.getRecruits);
+router.get('/', RecruitController.getRecruits);
 router.post('/', RecruitController.createRecruit);
 router.put('/', RecruitController.updateRecruit);
 router.delete('/', RecruitController.deleteRecruit);

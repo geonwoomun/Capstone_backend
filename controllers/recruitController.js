@@ -1,4 +1,4 @@
-const { Recruit, Qna } = require('../models/recruit');
+const { Recruit } = require('../models/recruit');
 const {
   Group,
   ActiveCategory,
@@ -10,16 +10,64 @@ const { DetailCategory } = require('../models/category');
 const { JoinGroup } = require('../models/groupMember');
 module.exports = class RecruitController {
   static async getRecruits(req, res) {
-    const { groupId } = req.params;
-
+    const { detailCategoryId } = req.query;
     try {
-      const qnas = await Recruit.findAll({
-        where: {
-          groupId,
-        },
-        include: { model: Qna },
+      const condition = detailCategoryId
+        ? {
+            include: {
+              model: JoinGroup,
+              required: true,
+              attributes: ['id', 'position'],
+              include: {
+                model: Group,
+                required: true,
+                attributes: [
+                  'name',
+                  'maxMember',
+                  'memberCount',
+                  'groupIntro',
+                  'location',
+                ],
+                include: {
+                  model: ActiveCategory,
+                  required: true,
+                  where: {
+                    detailCategoryId,
+                  },
+                },
+              },
+            },
+          }
+        : {
+            include: {
+              model: JoinGroup,
+              required: true,
+              attributes: ['id', 'position'],
+              include: {
+                model: Group,
+                required: true,
+                attributes: [
+                  'name',
+                  'maxMember',
+                  'memberCount',
+                  'groupIntro',
+                  'location',
+                ],
+              },
+            },
+          };
+
+      const recruits = await Recruit.findAll({
+        ...condition,
+        attributes: [
+          'id',
+          'title',
+          'contents',
+          'deadLine',
+          'expectMemberCount',
+        ],
       });
-      res.status(200).json({ qnas });
+      res.status(200).json({ recruits });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });

@@ -79,7 +79,7 @@ module.exports = class MemberController {
     }
   }
 
-  static async updateLocation() {
+  static async updateLocation(req, res) {
     const { memberId, deleteLocations = [], locationAddresses = [] } = req.body;
     try {
       await Promise.all([
