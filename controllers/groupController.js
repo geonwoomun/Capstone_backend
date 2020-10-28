@@ -15,7 +15,7 @@ module.exports = class GroupController {
   static async getGroups(req, res) {
     try {
       const groups = await Group.findAll({
-        attributes: ['id', 'name', 'memberCount', 'groupIntro'],
+        attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
         include: [
           { model: Skill, attributes: ['id', 'name'] },
           {
@@ -50,7 +50,7 @@ module.exports = class GroupController {
         where: {
           id: groupId,
         },
-        attributes: ['id', 'name', 'memberCount', 'groupIntro'],
+        attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
         include: [
           { model: Skill, attributes: ['id', 'name'] },
           {
