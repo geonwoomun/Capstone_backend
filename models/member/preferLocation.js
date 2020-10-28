@@ -28,7 +28,7 @@ module.exports = class PreferLocation extends Sequelize.Model {
 
   static associate(db) {
     this.belongsTo(db.Member, {
-      foreignKey: 'userId',
+      foreignKey: 'memberId',
       targetKey: 'id',
     });
   }

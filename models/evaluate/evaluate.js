@@ -38,11 +38,11 @@ module.exports = class Evaluate extends Sequelize.Model {
       targetKey: 'id',
     });
     this.belongsTo(db.Member, {
-      foreignKey: { field: 'evaluateeId', allowNull: true },
+      foreignKey: { name: 'evaluateeId', allowNull: true },
       targetKey: 'id',
     });
     this.belongsTo(db.Group, {
-      foreignKey: { field: 'evaluatedGroupId', allowNull: true },
+      foreignKey: { name: 'evaluatedGroupId', allowNull: true },
       targetKey: 'id',
     });
   }

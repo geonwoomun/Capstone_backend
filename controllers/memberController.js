@@ -1,4 +1,5 @@
 const { Member, PreferCategory, PreferLocation } = require('../models/member');
+const { DetailCategory } = require('../models/category');
 
 module.exports = class MemberController {
   static async getMyInfo(req, res) {
@@ -10,7 +11,13 @@ module.exports = class MemberController {
         attributes: {
           exclude: ['password', 'createdAt', 'updatedAt', 'deletedAt'],
         },
-        include: [{ model: PreferCategory }, { model: PreferLocation }],
+        include: [
+          {
+            model: PreferCategory,
+            include: { model: DetailCategory, attributes: ['id', 'name'] },
+          },
+          { model: PreferLocation },
+        ],
       });
 
       res.status(200).json({ info: myInfo });
@@ -34,7 +41,13 @@ module.exports = class MemberController {
           'type',
           'declareCount',
         ],
-        include: [{ model: PreferCategory }, { model: PreferLocation }],
+        include: [
+          {
+            model: PreferCategory,
+            include: { model: DetailCategory, attributes: ['id', 'name'] },
+          },
+          { model: PreferLocation },
+        ],
       });
       delete memberInfo.password;
       res.status(200).json({ info: memberInfo });

@@ -38,15 +38,15 @@ module.exports = class Declaration extends Sequelize.Model {
 
   static associate(db) {
     this.belongsTo(db.Member, {
-      foreignKey: { field: 'declarorId', allowNull: false },
+      foreignKey: { name: 'declarorId', allowNull: false },
       targetKey: 'id',
     });
     this.belongsTo(db.Member, {
-      foreignKey: { field: 'memberId', allowNull: true },
+      foreignKey: { name: 'memberId', allowNull: true },
       targetKey: 'id',
     });
     this.belongsTo(db.Recruit, {
-      foreignKey: { field: 'recruitId', allowNull: true },
+      foreignKey: { name: 'recruitId', allowNull: true },
       targetKey: 'id',
     });
   }
