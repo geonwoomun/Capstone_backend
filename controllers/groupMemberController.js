@@ -1,10 +1,11 @@
 const JoinGroup = require('../models/groupMember/joinGroup');
 const ApplyGroup = require('../models/groupMember/applyGroup');
 const PreferGroup = require('../models/groupMember/preferGroup');
-const { Group } = require('../models/group');
+const { Group, ActiveCategory } = require('../models/group');
 const { Member } = require('../models/member');
 const { QueryTypes } = require('sequelize');
 const sequelize = require('../models');
+const group = require('../models/group');
 
 module.exports = class GroupMemberController {
   static async getJoinGroup(req, res) {
@@ -217,33 +218,37 @@ module.exports = class GroupMemberController {
     // 작성한 모집글이 있으면, 모집 중, 아니면 모집 중이 아님.
 
     try {
-      const groups = await sequelize.query(
-        `SELECT a.groupId groupId, b.id recruitId FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId `,
-        {
-          replacements: [memberId],
-          type: QueryTypes.SELECT,
-        }
-      );
-      const recruitingGroupIds = [];
-      const recruitedGroupIds = [];
-      Array.from(groups).forEach((group) =>
-        group.recruitId
-          ? recruitingGroupIds.push(group.groupId)
-          : recruitedGroupIds.push(group.groupId)
-      );
+      const [recruitedGroupIds, recruitingGroupIds] = await Promise.all([
+        sequelize.query(
+          `SELECT a.groupId groupId FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine <= NOW() or ISNULL(B.deadLine)`,
+          {
+            replacements: [memberId],
+            type: QueryTypes.SELECT,
+          }
+        ),
+        sequelize.query(
+          `SELECT a.groupId groupId FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine > NOW()`,
+          {
+            replacements: [memberId],
+            type: QueryTypes.SELECT,
+          }
+        ),
+      ]);
 
       const [recruitingGroups, recruitedGroups] = await Promise.all([
         Group.findAll({
           where: {
-            id: recruitingGroupIds,
+            id: recruitingGroupIds.map((group) => group.groupId),
           },
           attributes: ['id', 'name', 'groupIntro', 'location'],
+          include: { model: ActiveCategory },
         }),
         Group.findAll({
           where: {
-            id: recruitedGroupIds,
+            id: recruitedGroupIds.map((group) => group.groupId),
           },
           attributes: ['id', 'name', 'groupIntro', 'location'],
+          include: { model: ActiveCategory },
         }),
       ]);
 

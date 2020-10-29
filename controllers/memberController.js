@@ -1,11 +1,11 @@
 const { Member, PreferCategory, PreferLocation } = require('../models/member');
-const { DetailCategory } = require('../models/category');
+const { DetailCategory, Category } = require('../models/category');
 
 module.exports = class MemberController {
   static async getMyInfo(req, res) {
     try {
       if (!req.user) return res.status(200).json(null);
-      console.log(req.user);
+
       const myInfo = await Member.findOne({
         where: { id: req.user.id },
         attributes: {
@@ -14,7 +14,12 @@ module.exports = class MemberController {
         include: [
           {
             model: PreferCategory,
-            include: { model: DetailCategory, attributes: ['id', 'name'] },
+            attributes: ['id'],
+            include: {
+              model: DetailCategory,
+              attributes: ['id', 'name'],
+              include: { model: Category, attributes: ['id', 'type'] },
+            },
           },
           { model: PreferLocation },
         ],
@@ -44,7 +49,12 @@ module.exports = class MemberController {
         include: [
           {
             model: PreferCategory,
-            include: { model: DetailCategory, attributes: ['id', 'name'] },
+            attributes: ['id'],
+            include: {
+              model: DetailCategory,
+              attributes: ['id', 'name'],
+              include: { model: Category, attributes: ['id', 'type'] },
+            },
           },
           { model: PreferLocation },
         ],
