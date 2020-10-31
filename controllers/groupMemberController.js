@@ -2,6 +2,7 @@ const JoinGroup = require('../models/groupMember/joinGroup');
 const ApplyGroup = require('../models/groupMember/applyGroup');
 const PreferGroup = require('../models/groupMember/preferGroup');
 const { Group, ActiveCategory } = require('../models/group');
+const { DetailCategory } = require('../models/category');
 const { Member } = require('../models/member');
 const { QueryTypes } = require('sequelize');
 const sequelize = require('../models');
@@ -220,14 +221,14 @@ module.exports = class GroupMemberController {
     try {
       const [recruitedGroupIds, recruitingGroupIds] = await Promise.all([
         sequelize.query(
-          `SELECT a.groupId groupId FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine <= NOW() or ISNULL(B.deadLine)`,
+          `SELECT a.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine <= NOW() or ISNULL(B.deadLine)`,
           {
             replacements: [memberId],
             type: QueryTypes.SELECT,
           }
         ),
         sequelize.query(
-          `SELECT a.groupId groupId FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine > NOW()`,
+          `SELECT a.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine > NOW()`,
           {
             replacements: [memberId],
             type: QueryTypes.SELECT,
@@ -241,18 +242,60 @@ module.exports = class GroupMemberController {
             id: recruitingGroupIds.map((group) => group.groupId),
           },
           attributes: ['id', 'name', 'groupIntro', 'location'],
-          include: { model: ActiveCategory },
+          include: [
+            {
+              model: ActiveCategory,
+              include: { model: DetailCategory },
+            },
+            {
+              model: PreferGroup,
+              attributes: ['type'],
+              where: {
+                memberId,
+              },
+            },
+          ],
         }),
         Group.findAll({
           where: {
             id: recruitedGroupIds.map((group) => group.groupId),
           },
           attributes: ['id', 'name', 'groupIntro', 'location'],
-          include: { model: ActiveCategory },
+          include: [
+            {
+              model: ActiveCategory,
+              include: { model: DetailCategory },
+            },
+            {
+              model: PreferGroup,
+              attributes: ['type'],
+              where: {
+                memberId,
+              },
+            },
+          ],
         }),
       ]);
+      const recruit = recruitingGroups.map((groups, index) => ({
+        ...groups,
+        deadLine: recruitingGroupIds[index].deadLine,
+      }));
+      const te = recruitedGroups.map((groups, index) => ({
+        ...groups,
+        deadLine: recruitedGroupIds[index].deadLine,
+      }));
 
-      res.status(200).json({ recruitingGroups, recruitedGroups });
+      console.log(recruitingGroupIds);
+      res.status(200).json({
+        recruitingGroups,
+        recruitingGroupsDeadLine: recruitingGroupIds.map(
+          (group) => group.deadLine
+        ),
+        recruitedGroups,
+        recruitedGroupsDeadLine: recruitedGroupIds.map(
+          (group) => group.deadLine
+        ),
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버에러 입니다.' });

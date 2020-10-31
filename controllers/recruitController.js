@@ -10,52 +10,45 @@ const { DetailCategory } = require('../models/category');
 const { JoinGroup } = require('../models/groupMember');
 module.exports = class RecruitController {
   static async getRecruits(req, res) {
-    const { detailCategoryId } = req.query;
+    const { categoryId, detailCategoryId } = req.query;
     try {
-      const condition = detailCategoryId
-        ? {
+      const condition = {
+        include: {
+          model: JoinGroup,
+          required: true,
+          attributes: ['id', 'position'],
+          include: {
+            model: Group,
+            required: true,
+            attributes: [
+              'name',
+              'maxMember',
+              'memberCount',
+              'groupIntro',
+              'location',
+            ],
             include: {
-              model: JoinGroup,
+              model: ActiveCategory,
               required: true,
-              attributes: ['id', 'position'],
-              include: {
-                model: Group,
-                required: true,
-                attributes: [
-                  'name',
-                  'maxMember',
-                  'memberCount',
-                  'groupIntro',
-                  'location',
-                ],
-                include: {
-                  model: ActiveCategory,
-                  required: true,
-                  where: {
+              where: detailCategoryId
+                ? {
                     detailCategoryId,
-                  },
-                },
-              },
-            },
-          }
-        : {
-            include: {
-              model: JoinGroup,
-              required: true,
-              attributes: ['id', 'position'],
+                  }
+                : {},
               include: {
-                model: Group,
+                model: DetailCategory,
                 required: true,
-                attributes: [
-                  'name',
-                  'maxMember',
-                  'memberCount',
-                  'groupIntro',
-                  'location',
-                ],
+                attributes: ['id', 'name', 'categoryId'],
+                where: categoryId
+                  ? {
+                      categoryId,
+                    }
+                  : {},
               },
             },
-          };
+          },
+        },
+      };
 
       const recruits = await Recruit.findAll({
         ...condition,

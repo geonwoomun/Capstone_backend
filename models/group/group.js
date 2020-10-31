@@ -45,5 +45,9 @@ module.exports = class Group extends Sequelize.Model {
     this.hasMany(db.GroupImage, { foreignKey: 'groupId', sourceKey: 'id' });
     this.hasMany(db.Skill, { foreignKey: 'groupId', sourceKey: 'id' });
     this.hasMany(db.ActiveCategory, { foreignKey: 'groupId', sourceKey: 'id' });
+    this.hasMany(db.PreferGroup, {
+      foreignKey: 'groupId',
+      sourceKey: 'id',
+    });
   }
 };
