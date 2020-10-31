@@ -27,25 +27,28 @@ module.exports = class RecruitController {
               'groupIntro',
               'location',
             ],
-            include: {
-              model: ActiveCategory,
-              required: true,
-              where: detailCategoryId
-                ? {
-                    detailCategoryId,
-                  }
-                : {},
-              include: {
-                model: DetailCategory,
+            include: [
+              {
+                model: ActiveCategory,
                 required: true,
-                attributes: ['id', 'name', 'categoryId'],
-                where: categoryId
+                where: detailCategoryId
                   ? {
-                      categoryId,
+                      detailCategoryId,
                     }
                   : {},
+                include: {
+                  model: DetailCategory,
+                  required: true,
+                  attributes: ['id', 'name', 'categoryId'],
+                  where: categoryId
+                    ? {
+                        categoryId,
+                      }
+                    : {},
+                },
               },
-            },
+              { model: GroupImage, attributes: ['id', 'URL', 'description'] },
+            ],
           },
         },
       };
