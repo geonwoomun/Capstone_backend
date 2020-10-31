@@ -135,11 +135,18 @@ module.exports = class RecruitController {
   }
 
   static async createRecruit(req, res) {
-    const { title, contents, deadline, expectMemberCount } = req.body;
+    const {
+      title,
+      contents,
+      deadline,
+      expectMemberCount,
+      groupMemberId,
+    } = req.body;
 
     const [years, hours] = deadline.split(' ');
     const [year, month, day] = years.split('-');
     const [hour, minutes, second] = hours.split(':');
+    //TODO: 리더인지 확인 하는거 해야함.
     try {
       await Recruit.create({
         title,
@@ -157,6 +164,7 @@ module.exports = class RecruitController {
           timeStyle: 'medium',
           hour12: false,
         }),
+        groupMemberId,
       });
 
       res.status(200).json({ message: '모집글이 작성되었습니다.' });
