@@ -7,7 +7,7 @@ const MemberController = require('../controllers/memberController');
 router.post('/join', isNotLoggedIn, AuthController.joinMember);
 router.post('/login', isNotLoggedIn, AuthController.loginMember);
 router.delete('/logout', isLoggedIn, AuthController.logoutMember);
-router.patch('/', isLoggedIn, AuthController.deleteMember);
+router.delete('/', isLoggedIn, AuthController.deleteMember);
 
 // /member
 router.get('/', MemberController.getMyInfo);

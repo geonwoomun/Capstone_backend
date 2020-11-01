@@ -83,32 +83,25 @@ module.exports = class AuthController {
   }
 
   static async deleteMember(req, res) {
-    const { email, password } = req.body;
     try {
-      const user = await Member.findOne({ where: { email } });
+      const user = await Member.findOne({ where: { id: req.user.id } });
       if (!user) {
-        return res
-          .status(400)
-          .json({ message: '아이디 또는 비밀번호가 틀렸습니다.' });
-      }
-
-      const result = await bcrypt.compare(password, user.password);
-      if (!result) {
-        return res
-          .status(400)
-          .json({ message: '아이디 또는 비밀번호가 틀렸습니다.' });
+        return res.status(400).json({ message: '로그인이 안 되어 있습니다.' });
       }
 
       await Member.destroy({
         where: {
-          email,
+          id: req.user.id,
         },
       });
 
+      req.logout();
+      req.session.destroy();
+      res.clearCookie('connect.sid');
       return res.status(200).json({ message: '회원탈퇴 성공' });
     } catch (error) {
       console.error(error);
-      return next(error);
+      return res.status(500).json({ message: '서버 에러 입니다.' });
     }
   }
 };
