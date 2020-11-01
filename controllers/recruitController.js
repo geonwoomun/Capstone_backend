@@ -144,7 +144,7 @@ module.exports = class RecruitController {
     const [hour, minutes, second] = hours.split(':');
     //TODO: 리더인지 확인 하는거 해야함.
     try {
-      await Recruit.create({
+      const newRecruit = await Recruit.create({
         title,
         contents,
         expectMemberCount,
@@ -163,7 +163,12 @@ module.exports = class RecruitController {
         groupMemberId,
       });
 
-      res.status(200).json({ message: '모집글이 작성되었습니다.' });
+      res
+        .status(200)
+        .json({
+          message: '모집글이 작성되었습니다.',
+          recruitId: newRecruit.id,
+        });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다' });
