@@ -276,16 +276,7 @@ module.exports = class GroupMemberController {
           ],
         }),
       ]);
-      const recruit = recruitingGroups.map((groups, index) => ({
-        ...groups,
-        deadLine: recruitingGroupIds[index].deadLine,
-      }));
-      const te = recruitedGroups.map((groups, index) => ({
-        ...groups,
-        deadLine: recruitedGroupIds[index].deadLine,
-      }));
 
-      console.log(recruitingGroupIds);
       res.status(200).json({
         recruitingGroups,
         recruitingGroupsDeadLine: recruitingGroupIds.map(

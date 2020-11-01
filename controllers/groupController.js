@@ -131,7 +131,9 @@ module.exports = class GroupController {
         ),
       ]);
 
-      res.status(201).json({ message: '그룹이 생성 되었습니다.' });
+      res
+        .status(201)
+        .json({ message: '그룹이 생성 되었습니다.', groupId: groupData.id });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });

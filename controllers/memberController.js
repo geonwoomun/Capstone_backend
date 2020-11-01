@@ -1,5 +1,6 @@
 const { Member, PreferCategory, PreferLocation } = require('../models/member');
 const { DetailCategory, Category } = require('../models/category');
+const { Op } = require('sequelize');
 
 module.exports = class MemberController {
   static async getMyInfo(req, res) {
@@ -94,26 +95,46 @@ module.exports = class MemberController {
   }
 
   static async updateCategory(req, res) {
-    const { memberId, deleteCategorys = [], newCategorys = [] } = req.body;
-    try {
-      await Promise.all([
-        PreferCategory.destroy({
-          where: {
-            memberId,
-            detailCategoryId: deleteCategorys,
-          },
-        }),
-        PreferCategory.bulkCreate(
-          newCategorys.map((categoryId) => ({
-            memberId,
-            detailCategoryId: categoryId,
-          }))
-        ),
-      ]);
+    const { memberId, categoryIds } = req.body;
 
-      res
-        .status(200)
-        .json({ message: '선호 카테고리 업데이트 완료되었습니다.' });
+    try {
+      await PreferCategory.destroy({
+        where: {
+          memberId,
+          detailCategoryId: {
+            [Op.notIn]: categoryIds,
+          },
+        },
+      });
+
+      await Promise.all(
+        categoryIds.map((detailCategoryId) =>
+          PreferCategory.findOrCreate({
+            where: {
+              memberId,
+              detailCategoryId,
+            },
+          })
+        )
+      );
+
+      const preferCategory = await PreferCategory.findAll({
+        where: {
+          memberId,
+        },
+        include: {
+          model: DetailCategory,
+          attributes: ['id', 'name'],
+          include: {
+            model: Category,
+            attributes: ['id', 'type'],
+          },
+        },
+      });
+      res.status(200).json({
+        message: '선호 카테고리 업데이트 완료되었습니다.',
+        preferCategory,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });
@@ -121,23 +142,38 @@ module.exports = class MemberController {
   }
 
   static async updateLocation(req, res) {
-    const { memberId, deleteLocations = [], locationAddresses = [] } = req.body;
+    const { memberId, locations } = req.body;
+    console.log(memberId, locations);
     try {
+      const existId = locations
+        .filter((location) => location.id)
+        .map((location) => location.id);
+      const newLocations = locations.filter((location) => !location.id);
+
       await Promise.all([
         PreferLocation.destroy({
           where: {
             memberId,
-            id: deleteLocations,
+            id: { [Op.notIn]: existId },
           },
         }),
         PreferLocation.bulkCreate(
-          locationAddresses.map((address) => ({
-            address,
+          newLocations.map((location) => ({
+            address: location.address,
+            memberId,
           }))
         ),
       ]);
 
-      res.status(200).json({ message: '활동지역 수정이 완료되었습니다.' });
+      const preferLocations = await PreferLocation.findAll({
+        where: {
+          memberId,
+        },
+      });
+
+      res
+        .status(200)
+        .json({ message: '활동지역 수정이 완료되었습니다.', preferLocations });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });
