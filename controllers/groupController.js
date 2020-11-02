@@ -149,7 +149,7 @@ module.exports = class GroupController {
       groupImages = [],
       activeTimes = [],
       skills = [],
-      activeCategories = [],
+      detailCategoryIds = [],
     } = req.body;
 
     // 유저가 groupId의 팀장이 아니면 패스.
@@ -180,20 +180,6 @@ module.exports = class GroupController {
           return total;
         },
         { oldActiveTimeIds: [], newActiveTimes: [] }
-      );
-
-      const {
-        oldActiveCategoryIds,
-        newActiveCategories,
-      } = activeCategories.reduce(
-        (total, activeCategory) => {
-          if (activeCategory.id)
-            total.oldActiveCategoryIds.push(activeCategory.id);
-          if (!activeCategory.id)
-            total.newActiveCategories.push(activeCategory);
-          return total;
-        },
-        { oldActiveCategoryIds: [], newActiveCategories: [] }
       );
 
       const { oldSkillIds, newSkills } = skills.reduce(
@@ -240,8 +226,8 @@ module.exports = class GroupController {
         ActiveCategory.destroy({
           where: {
             groupId,
-            id: {
-              [Op.notIn]: oldActiveCategoryIds,
+            detailCategoryId: {
+              [Op.notIn]: detailCategoryIds,
             },
           },
         }),
@@ -252,11 +238,13 @@ module.exports = class GroupController {
           newGroupImages.map((groupImage) => ({ ...groupImage, groupId }))
         ),
         Skill.bulkCreate(newSkills.map((skill) => ({ ...skill, groupId }))),
-        ActiveCategory.bulkCreate(
-          newActiveCategories.map((activeCategory) => ({
-            ...activeCategory,
-            groupId,
-          }))
+        ...detailCategoryIds.map((detailCategoryId) =>
+          ActiveCategory.findOrCreate({
+            where: {
+              groupId,
+              detailCategoryId,
+            },
+          })
         ),
       ]);
 
