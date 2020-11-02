@@ -143,18 +143,22 @@ module.exports = class MemberController {
 
   static async updateLocation(req, res) {
     const { memberId, locations } = req.body;
-    console.log(memberId, locations);
+
     try {
-      const existId = locations
-        .filter((location) => location.id)
-        .map((location) => location.id);
-      const newLocations = locations.filter((location) => !location.id);
+      const { oldLocationIds, newLocations } = locations.reduce(
+        (total, location) => {
+          if (location.id) total.oldLocationIds.push(location.id);
+          if (!location.id) total.newLocations.push(location);
+          return total;
+        },
+        { oldLocationIds: [], newLocations: [] }
+      );
 
       await Promise.all([
         PreferLocation.destroy({
           where: {
             memberId,
-            id: { [Op.notIn]: existId },
+            id: { [Op.notIn]: oldLocationIds },
           },
         }),
         PreferLocation.bulkCreate(
