@@ -149,9 +149,7 @@ module.exports = class GroupController {
       groupImages = [],
       activeTimes = [],
       skills = [],
-      deleteGroupImagesId = [],
-      deleteActiveTimesId = [],
-      deleteSkillsId = [],
+      activeCategories = [],
     } = req.body;
 
     // 유저가 groupId의 팀장이 아니면 패스.
@@ -165,6 +163,47 @@ module.exports = class GroupController {
       }
 
       const groupInfo = await Group.findOne({ where: { id: groupId } });
+
+      const { oldGroupImageIds, newGroupImages } = groupImages.reduce(
+        (total, groupImage) => {
+          if (groupImage.id) total.oldGroupImageIds.push(groupImage.id);
+          if (!groupImage.id) total.newGroupImages.push(groupImage);
+          return total;
+        },
+        { oldGroupImageIds: [], newGroupImages: [] }
+      );
+
+      const { oldActiveTimeIds, newActiveTimes } = activeTimes.reduce(
+        (total, activeTime) => {
+          if (activeTime.id) total.oldActiveTimeIds.push(activeTime.id);
+          if (!activeTime.id) total.newActiveTimes.push(activeTime);
+          return total;
+        },
+        { oldActiveTimeIds: [], newActiveTimes: [] }
+      );
+
+      const {
+        oldActiveCategoryIds,
+        newActiveCategories,
+      } = activeCategories.reduce(
+        (total, activeCategory) => {
+          if (activeCategory.id)
+            total.oldActiveCategoryIds.push(activeCategory.id);
+          if (!activeCategory.id)
+            total.newActiveCategories.push(activeCategory);
+          return total;
+        },
+        { oldActiveCategoryIds: [], newActiveCategories: [] }
+      );
+
+      const { oldSkillIds, newSkills } = skills.reduce(
+        (total, skill) => {
+          if (skill.id) total.oldSkillIds.push(skill.id);
+          if (!skill.id) total.newSkills.push(skill);
+          return total;
+        },
+        { oldSkillIds: [], newSkills: [] }
+      );
       await Group.update(
         {
           groupName: groupName || groupInfo.groupName,
@@ -178,7 +217,7 @@ module.exports = class GroupController {
           where: {
             groupId,
             id: {
-              [Op.in]: deleteGroupImagesId,
+              [Op.notIn]: oldGroupImageIds,
             },
           },
         }),
@@ -186,7 +225,7 @@ module.exports = class GroupController {
           where: {
             groupId,
             id: {
-              [Op.in]: deleteActiveTimesId,
+              [Op.notIn]: oldActiveTimeIds,
             },
           },
         }),
@@ -194,17 +233,31 @@ module.exports = class GroupController {
           where: {
             groupId,
             id: {
-              [Op.in]: deleteSkillsId,
+              [Op.notIn]: oldSkillIds,
+            },
+          },
+        }),
+        ActiveCategory.destroy({
+          where: {
+            groupId,
+            id: {
+              [Op.notIn]: oldActiveCategoryIds,
             },
           },
         }),
         ActiveTime.bulkCreate(
-          activeTimes.map((time) => ({ ...time, groupId }))
+          newActiveTimes.map((time) => ({ ...time, groupId }))
         ),
         GroupImage.bulkCreate(
-          groupImages.map((groupImage) => ({ ...groupImage, groupId }))
+          newGroupImages.map((groupImage) => ({ ...groupImage, groupId }))
         ),
-        Skill.bulkCreate(skills.map((skill) => ({ ...skill, groupId }))),
+        Skill.bulkCreate(newSkills.map((skill) => ({ ...skill, groupId }))),
+        ActiveCategory.bulkCreate(
+          newActiveCategories.map((activeCategory) => ({
+            ...activeCategory,
+            groupId,
+          }))
+        ),
       ]);
 
       res.status(200).json({ message: '그룹의 정보가 변경 되었습니다.' });
