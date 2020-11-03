@@ -130,6 +130,38 @@ module.exports = class RecruitController {
     }
   }
 
+  static async getMemberRecruits(req, res) {
+    const { memberId } = req.params;
+    try {
+      const joinUsers = await JoinGroup.findAll({
+        where: {
+          memberId,
+          position: 'L',
+        },
+        attributes: ['id'],
+      });
+
+      const recruits = await Recruit.findAll({
+        where: {
+          groupMemberId: joinUsers.map((joinUser) => joinUser.id),
+        },
+        attributes: { exclude: ['updatedAt', 'groupMemberId'] },
+        include: {
+          model: JoinGroup,
+          attributes: ['id', 'position'],
+          include: {
+            model: Group,
+            attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+          },
+        },
+      });
+
+      res.status(200).json({ recruits });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: '서버 에러입니다' });
+    }
+  }
   static async createRecruit(req, res) {
     const {
       title,
@@ -163,12 +195,10 @@ module.exports = class RecruitController {
         groupMemberId,
       });
 
-      res
-        .status(200)
-        .json({
-          message: '모집글이 작성되었습니다.',
-          recruitId: newRecruit.id,
-        });
+      res.status(200).json({
+        message: '모집글이 작성되었습니다.',
+        recruitId: newRecruit.id,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다' });

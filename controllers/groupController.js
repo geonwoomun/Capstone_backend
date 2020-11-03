@@ -7,6 +7,7 @@ const {
 } = require('../models/group');
 const { DetailCategory, Category } = require('../models/category');
 const { JoinGroup } = require('../models/groupMember');
+const { Member } = require('../models/member');
 const { Op } = require('sequelize');
 // 그룹 관련된 이미지랑, 스킬, 해시태그, 활동시간 등을 같이 준다고 하면...
 // bulkcreate
@@ -52,6 +53,17 @@ module.exports = class GroupController {
         },
         attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
         include: [
+          {
+            model: JoinGroup,
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+            where: {
+              position: 'L',
+            },
+            include: {
+              model: Member,
+              attributes: ['id', 'email', 'name', 'profileImg'],
+            },
+          },
           { model: Skill, attributes: ['id', 'name'] },
           {
             model: ActiveTime,
