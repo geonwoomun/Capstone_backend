@@ -1,7 +1,7 @@
 const JoinGroup = require('../models/groupMember/joinGroup');
 const ApplyGroup = require('../models/groupMember/applyGroup');
 const PreferGroup = require('../models/groupMember/preferGroup');
-const { Group, ActiveCategory } = require('../models/group');
+const { Group, ActiveCategory, GroupImage } = require('../models/group');
 const { DetailCategory } = require('../models/category');
 const { Member } = require('../models/member');
 const { QueryTypes } = require('sequelize');
@@ -19,6 +19,10 @@ module.exports = class GroupMemberController {
           {
             model: Group,
             attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+            include: {
+              model: GroupImage,
+              attributes: ['id', 'URL', 'description'],
+            },
           },
         ],
       });
