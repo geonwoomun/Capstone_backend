@@ -55,7 +55,7 @@ module.exports = class GroupController {
         include: [
           {
             model: JoinGroup,
-            attributes: { exclude: ['createdAt', 'updatedAt'] },
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
             where: {
               position: 'L',
             },
