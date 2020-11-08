@@ -92,7 +92,7 @@ module.exports = class SearchController {
         attributes: {
           include: [
             [
-              sequelize.fn('COUNT', sequelize.col('prefergroups.groupId')),
+              sequelize.fn('COUNT', sequelize.col('preferGroups.groupId')),
               'likeNumber',
             ],
           ],
@@ -133,35 +133,6 @@ module.exports = class SearchController {
 
       console.log(groups);
       res.status(200).json({ groups });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: '서버 에러입니다.' });
-    }
-  }
-
-  static async searchGroupsByFilter(req, res) {
-    const { sortBase, peopleNumber, activeDay, activeLocation } = req.body;
-
-    try {
-      const recruits = await Group.findAll({
-        where: {
-          [Op.or]: [
-            {
-              title: {
-                [Op.like]: `%${recruitName}%`,
-              },
-            },
-            {
-              contents: {
-                [Op.like]: `%${recruitName}%`,
-              },
-            },
-          ],
-        },
-        attributes: ['id', 'title', 'contents', 'deadline'],
-      });
-
-      res.status(200).json({ recruits });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });
