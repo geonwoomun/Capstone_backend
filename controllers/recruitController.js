@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { Recruit } = require('../models/recruit');
 const {
   Group,
@@ -10,8 +11,27 @@ const { DetailCategory } = require('../models/category');
 const { JoinGroup } = require('../models/groupMember');
 module.exports = class RecruitController {
   static async getRecruits(req, res) {
-    const { categoryId, detailCategoryId } = req.query;
+    const { categoryId, detailCategoryId, recruitName } = req.query;
+
     try {
+      const nameCondition = recruitName
+        ? {
+            where: {
+              [Op.or]: [
+                {
+                  title: {
+                    [Op.like]: `%${recruitName}%`,
+                  },
+                },
+                {
+                  contents: {
+                    [Op.like]: `%${recruitName}%`,
+                  },
+                },
+              ],
+            },
+          }
+        : {};
       const condition = {
         include: {
           model: JoinGroup,
@@ -55,6 +75,7 @@ module.exports = class RecruitController {
 
       const recruits = await Recruit.findAll({
         ...condition,
+        ...nameCondition,
         attributes: [
           'id',
           'title',

@@ -14,12 +14,26 @@ const { Category, DetailCategory } = require('../models/category');
 module.exports = class SearchController {
   static async searchGroupByFilter(req, res) {
     const {
+      category,
       groupName,
       sortBase,
       peopleNumber,
       activeDay = [],
       activeLocation = [],
     } = req.body;
+
+    const detailIds = await DetailCategory.findAll({
+      attributes: ['id'],
+      include: [
+        {
+          model: Category,
+          where: {
+            type: category,
+          },
+          required: true,
+        },
+      ],
+    });
 
     const nameCondition = groupName
       ? {
@@ -100,46 +114,25 @@ module.exports = class SearchController {
             include: [
               {
                 model: DetailCategory,
+                where: {
+                  id: {
+                    [Op.in]: detailIds.map((v) => v.id),
+                  },
+                },
+                required: true,
                 attributes: ['id', 'name'],
                 include: { model: Category, attributes: ['id', 'type'] },
               },
             ],
+            required: true,
           },
         ],
         group: ['id'],
         order: [sortBaseCondition],
       });
 
+      console.log(groups);
       res.status(200).json({ groups });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: '서버 에러입니다.' });
-    }
-  }
-
-  static async searchRecruitName(req, res) {
-    const { recruitName } = req.params;
-
-    try {
-      const recruits = await Recruit.findAll({
-        where: {
-          [Op.or]: [
-            {
-              title: {
-                [Op.like]: `%${recruitName}%`,
-              },
-            },
-            {
-              contents: {
-                [Op.like]: `%${recruitName}%`,
-              },
-            },
-          ],
-        },
-        attributes: ['id', 'title', 'contents', 'deadline'],
-      });
-
-      res.status(200).json({ recruits });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });

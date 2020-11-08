@@ -3,6 +3,7 @@ const router = express.Router();
 const { isLoggedIn } = require('../middlewares');
 const GroupMemberController = require('../controllers/groupMemberController');
 
+router.get('/apply/:applyId', GroupMemberController.getApply);
 router.get('/apply-member/:groupId', GroupMemberController.getApplyMember);
 router.get('/apply-group/:memberId', GroupMemberController.getApplyGroup);
 router.patch('/apply-group', GroupMemberController.rejectApplyMember);

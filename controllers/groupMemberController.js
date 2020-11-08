@@ -153,6 +153,44 @@ module.exports = class GroupMemberController {
     }
   }
 
+  static async getApply(req, res) {
+    const { applyId } = req.params;
+    try {
+      const apply = await ApplyGroup.findOne({
+        where: {
+          id: applyId,
+        },
+        include: [
+          {
+            model: Member,
+            attributes: {
+              exclude: ['password', 'createdAt', 'updatedAt', 'deltedAt'],
+            },
+          },
+          {
+            model: Group,
+            include: [
+              {
+                model: GroupImage,
+                attributes: {
+                  exclude: ['createdAt', 'updatedAt'],
+                },
+              },
+            ],
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'deletedAt'],
+            },
+          },
+        ],
+      });
+
+      res.status(200).json({ apply });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: ' 서버 에러입니다.' });
+    }
+  }
+
   static async createApplyGroup(req, res) {
     const { memberId, groupId, portfolio, activityPeriod } = req.body;
 
