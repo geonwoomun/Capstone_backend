@@ -9,7 +9,6 @@ const {
 } = require('../models/group');
 const { PreferGroup } = require('../models/groupMember');
 const { Category, DetailCategory } = require('../models/category');
-
 module.exports = class SearchController {
   static async searchGroupByFilter(req, res) {
     const {
@@ -75,29 +74,16 @@ module.exports = class SearchController {
           };
 
     const sortBaseCondition =
-      sortBase === 'like'
-        ? [sequelize.literal('likeNumber'), 'DESC']
-        : sortBase === 'lastest'
-        ? ['createdAt', 'ASC']
-        : ['id', 'DESC'];
+      sortBase === 'lastest' ? ['createdAt', 'ASC'] : ['id', 'DESC'];
 
     try {
-      const groups = await Group.findAll({
+      let groups = await Group.findAll({
         where: {
           ...nameCondition,
           ...numberCondition,
           ...activeLocationCondition,
         },
         attributes: {
-          include: [
-            [
-              sequelize.fn('COUNT', sequelize.col('PreferGroups.groupId')),
-              // sequelize.literal(
-              //   `COUNT(*)`
-              // ),
-              'likeNumber',
-            ],
-          ],
           exclude: ['createdAt', 'updatedAt', 'deletedAt'],
         },
         include: [
@@ -129,11 +115,37 @@ module.exports = class SearchController {
             required: true,
           },
         ],
-        group: ['id'],
+        group: ['Group.id'],
         order: [sortBaseCondition],
       });
 
-      res.status(200).json({ groups });
+      const result = await Promise.all(
+        groups.map((group) =>
+          Group.findOne({
+            attributes: [[sequelize.fn('COUNT', '*'), 'likeNumber']],
+            where: {
+              id: group.id,
+            },
+            include: {
+              model: PreferGroup,
+              required: true,
+            },
+            group: ['id'],
+          })
+        )
+      );
+
+      groups = groups.map((group, index) => {
+        group = JSON.parse(JSON.stringify(group));
+        const obj = JSON.parse(JSON.stringify(result[index]));
+        return { ...group, likeNumber: obj.likeNumber };
+      });
+      if (sortBase === 'like')
+        groups.sort((a, b) => b.likeNumber - a.likeNumber);
+
+      res.status(200).json({
+        groups,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: '서버 에러입니다.' });
