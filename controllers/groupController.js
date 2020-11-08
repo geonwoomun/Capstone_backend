@@ -174,6 +174,7 @@ module.exports = class GroupController {
       groupName,
       groupIntro,
       maxMember,
+      location,
       groupImages = [],
       activeTimes = [],
       skills = [],
@@ -223,6 +224,8 @@ module.exports = class GroupController {
           groupName: groupName || groupInfo.groupName,
           groupIntro: groupIntro || groupInfo.groupIntro,
           maxMember: maxMember || groupInfo.maxMember,
+          location: location || groupInfo.location,
+          states: location ? location.split(' ')[0] : groupInfo.states,
         },
         { where: { id: groupId } }
       );
