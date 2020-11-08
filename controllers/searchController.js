@@ -16,7 +16,7 @@ module.exports = class SearchController {
       category,
       groupName,
       sortBase,
-      peopleNumber,
+      peopleNumber = 0,
       activeDay = [],
       activeLocation = [],
     } = req.body;
