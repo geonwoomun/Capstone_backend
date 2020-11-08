@@ -30,7 +30,7 @@ module.exports = class ApplyGroup extends Sequelize.Model {
         timestamps: false,
         underscored: false,
         modelName: 'ApplyGroup',
-        tableName: 'ApplyGroups',
+        tableName: 'applyGroups',
         paranoid: false,
         charset: 'utf8',
         collate: 'utf8_general_ci',

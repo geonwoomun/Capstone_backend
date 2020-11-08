@@ -8,7 +8,6 @@ const {
   ActiveCategory,
 } = require('../models/group');
 const { PreferGroup } = require('../models/groupMember');
-const { Recruit } = require('../models/recruit');
 const { Category, DetailCategory } = require('../models/category');
 
 module.exports = class SearchController {
@@ -93,6 +92,9 @@ module.exports = class SearchController {
           include: [
             [
               sequelize.fn('COUNT', sequelize.col('preferGroups.groupId')),
+              // sequelize.literal(
+              //   `COUNT(*)`
+              // ),
               'likeNumber',
             ],
           ],
@@ -131,7 +133,6 @@ module.exports = class SearchController {
         order: [sortBaseCondition],
       });
 
-      console.log(groups);
       res.status(200).json({ groups });
     } catch (error) {
       console.error(error);
