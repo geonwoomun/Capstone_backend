@@ -225,14 +225,14 @@ module.exports = class GroupMemberController {
     try {
       const [recruitedGroupIds, recruitingGroupIds] = await Promise.all([
         sequelize.query(
-          `SELECT a.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine <= NOW() or ISNULL(B.deadLine)`,
+          `SELECT A.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine <= NOW() or ISNULL(B.deadLine)`,
           {
             replacements: [memberId],
             type: QueryTypes.SELECT,
           }
         ),
         sequelize.query(
-          `SELECT a.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine > NOW()`,
+          `SELECT A.groupId groupId, B.deadLine deadLine FROM (SELECT * FROM joinGroups where groupId IN (SELECT groupId FROM preferGroups where memberId = ?) and position = "L") A LEFT JOIN recruits B on A.id = B.groupMemberId where B.deadLine > NOW()`,
           {
             replacements: [memberId],
             type: QueryTypes.SELECT,
