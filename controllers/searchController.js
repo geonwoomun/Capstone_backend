@@ -115,7 +115,6 @@ module.exports = class SearchController {
             required: true,
           },
         ],
-        group: ['Group.id'],
         order: [sortBaseCondition],
       });
 
