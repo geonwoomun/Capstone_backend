@@ -136,8 +136,9 @@ module.exports = class SearchController {
 
       groups = groups.map((group, index) => {
         group = JSON.parse(JSON.stringify(group));
+
         const obj = JSON.parse(JSON.stringify(result[index]));
-        return { ...group, likeNumber: obj.likeNumber };
+        return { ...group, likeNumber: obj ? obj.likeNumber : 0 };
       });
       if (sortBase === 'like')
         groups.sort((a, b) => b.likeNumber - a.likeNumber);
