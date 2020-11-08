@@ -1,6 +1,8 @@
 const { Member, PreferCategory, PreferLocation } = require('../models/member');
 const { DetailCategory, Category } = require('../models/category');
 const { Op } = require('sequelize');
+const { ApplyGroup, JoinGroup, PreferGroup } = require('../models/groupMember');
+const { Group, GroupImage, ActiveCategory } = require('../models/group');
 
 module.exports = class MemberController {
   static async getMyInfo(req, res) {
@@ -23,6 +25,57 @@ module.exports = class MemberController {
             },
           },
           { model: PreferLocation },
+          {
+            model: PreferGroup,
+            include: {
+              model: Group,
+              attributes: {
+                exclude: ['updatedAt', 'deletedAt'],
+              },
+              include: [
+                {
+                  model: GroupImage,
+                },
+                { model: ActiveCategory, include: { model: DetailCategory } },
+              ],
+            },
+          },
+          {
+            model: ApplyGroup,
+            include: {
+              model: Group,
+              include: [
+                {
+                  model: GroupImage,
+                },
+                { model: ActiveCategory, include: { model: DetailCategory } },
+              ],
+              attributes: {
+                exclude: ['updatedAt', 'deletedAt'],
+              },
+            },
+            attributes: {
+              exclude: ['updatedAt', 'deletedAt'],
+            },
+          },
+          {
+            model: JoinGroup,
+            include: {
+              model: Group,
+              include: [
+                {
+                  model: GroupImage,
+                },
+                { model: ActiveCategory, include: { model: DetailCategory } },
+              ],
+              attributes: {
+                exclude: ['updatedAt', 'deletedAt'],
+              },
+            },
+            attributes: {
+              exclude: ['updatedAt', 'deletedAt'],
+            },
+          },
         ],
       });
 

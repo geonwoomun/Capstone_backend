@@ -221,7 +221,7 @@ module.exports = class GroupController {
       );
       await Group.update(
         {
-          groupName: groupName || groupInfo.groupName,
+          name: groupName || groupInfo.groupName,
           groupIntro: groupIntro || groupInfo.groupIntro,
           maxMember: maxMember || groupInfo.maxMember,
           location: location || groupInfo.location,
