@@ -16,7 +16,14 @@ module.exports = class GroupController {
   static async getGroups(req, res) {
     try {
       const groups = await Group.findAll({
-        attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+        attributes: [
+          'id',
+          'name',
+          'memberCount',
+          'groupIntro',
+          'states',
+          'location',
+        ],
         include: [
           { model: Skill, attributes: ['id', 'name'] },
           {
@@ -51,7 +58,14 @@ module.exports = class GroupController {
         where: {
           id: groupId,
         },
-        attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+        attributes: [
+          'id',
+          'name',
+          'memberCount',
+          'groupIntro',
+          'states',
+          'location',
+        ],
         include: [
           {
             model: JoinGroup,
@@ -110,6 +124,7 @@ module.exports = class GroupController {
 
       const groupData = await Group.create({
         name: groupName,
+        states: location.split(' ')[0],
         location,
         groupIntro,
         maxMember,
@@ -158,6 +173,7 @@ module.exports = class GroupController {
       memberId,
       groupName,
       groupIntro,
+      maxMember,
       groupImages = [],
       activeTimes = [],
       skills = [],
@@ -206,6 +222,7 @@ module.exports = class GroupController {
         {
           groupName: groupName || groupInfo.groupName,
           groupIntro: groupIntro || groupInfo.groupIntro,
+          maxMember: maxMember || groupInfo.maxMember,
         },
         { where: { id: groupId } }
       );

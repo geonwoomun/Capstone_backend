@@ -22,6 +22,10 @@ module.exports = class Group extends Sequelize.Model {
           type: Sequelize.TEXT,
           allowNull: true,
         },
+        states: {
+          type: Sequelize.STRING(10),
+          allowNull: true,
+        },
         location: {
           type: Sequelize.STRING(150),
           allowNull: true,
