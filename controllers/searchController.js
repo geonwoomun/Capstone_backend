@@ -91,7 +91,7 @@ module.exports = class SearchController {
         attributes: {
           include: [
             [
-              sequelize.fn('COUNT', sequelize.col('preferGroups.groupId')),
+              sequelize.fn('COUNT', sequelize.col('PreferGroups.groupId')),
               // sequelize.literal(
               //   `COUNT(*)`
               // ),
