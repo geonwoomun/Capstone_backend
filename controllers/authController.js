@@ -68,7 +68,7 @@ module.exports = class AuthController {
             isProved,
             telephone,
             profileImg,
-            gender: gender ? '여자' : '남자',
+            gender,
           },
         });
       });
