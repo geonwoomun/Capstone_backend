@@ -6,6 +6,10 @@ module.exports = class Evaluate extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
+        title: {
+          type: Sequelize.STRING(100),
+          allowNull: false,
+        },
         contents: {
           type: Sequelize.STRING(200),
           allowNull: false,

@@ -20,6 +20,28 @@ module.exports = class JoinGroup extends Sequelize.Model {
         paranoid: true,
         charset: 'utf8',
         collate: 'utf8_general_ci',
+        hooks: {
+          afterCreate: (joinuser, options) => {
+            sequelize.models.Group.update(
+              { memberCount: sequelize.literal('memberCount + 1') },
+              {
+                where: {
+                  id: joinuser.groupId,
+                },
+              }
+            );
+          },
+          afterDestroy: (joinUser, options) => {
+            sequelize.models.Group.update(
+              { memberCount: sequelize('memberCount - 1') },
+              {
+                where: {
+                  id: joinUser.groupId,
+                },
+              }
+            );
+          },
+        },
       }
     );
   }
