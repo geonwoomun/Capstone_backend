@@ -122,6 +122,10 @@ module.exports = class GroupMemberController {
           {
             model: Group,
             attributes: ['id', 'name', 'memberCount', 'groupIntro'],
+            include: {
+              model: GroupImage,
+              attributes: ['id', 'URL', 'description'],
+            },
           },
         ],
       });
@@ -142,6 +146,14 @@ module.exports = class GroupMemberController {
           {
             model: Member,
             attributes: ['id', 'email', 'name'],
+          },
+          {
+            model: Group,
+            attributes: ['id', 'name', 'location', 'groupIntro'],
+            include: {
+              model: GroupImage,
+              attributes: ['id', 'URL', 'description'],
+            },
           },
         ],
       });
