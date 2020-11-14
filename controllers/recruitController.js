@@ -173,6 +173,10 @@ module.exports = class RecruitController {
           include: {
             model: Group,
             attributes: ['id', 'name', 'memberCount', 'groupIntro', 'location'],
+            include: {
+              model: GroupImage,
+              attributes: ['id', 'URL', 'description'],
+            },
           },
         },
       });
