@@ -9,7 +9,7 @@ module.exports = class EvaluationController {
       let evaluates;
       if (evaluatedGroupId)
         evaluates = await sequelize.query(
-          `SELECT E.id, E.contents, E.score, G.id evalutedGroupId, G.name, E.createdAt createdAt FROM evaluates E INNER JOIN groups G on E.evaluatedGroupId = G.id 
+          `SELECT E.id,E.title, E.contents, E.score, G.id evalutedGroupId, G.name, E.createdAt createdAt FROM evaluates E INNER JOIN groups G on E.evaluatedGroupId = G.id 
                 INNER JOIN members M ON E.evaluatorId = M.id where E.evaluatedGroupId = ?`,
           {
             replacements: [evaluatedGroupId],
@@ -18,7 +18,7 @@ module.exports = class EvaluationController {
         );
       if (evaluateeId)
         evaluates = await sequelize.query(
-          `SELECT E.id, E.contents, E.score, M.id evaluatorId, M.email, M.name, E.createdAt createdAt FROM evaluates E INNER JOIN members M on E.evaluateeId = M.id 
+          `SELECT E.id, E.title, E.contents, E.score, M.id evaluatorId, M.email, M.name, E.createdAt createdAt FROM evaluates E INNER JOIN members M on E.evaluateeId = M.id 
               INNER JOIN members N ON E.evaluatorId = N.id where E.evaluateeId = ?`,
           {
             replacements: [evaluateeId],
@@ -37,12 +37,14 @@ module.exports = class EvaluationController {
       evaluatorId,
       evaluatedGroupId,
       evaluateeId,
+      title,
       contents,
       score,
       type,
     } = req.body;
     try {
       await Evaluate.create({
+        title,
         contents,
         score,
         type,

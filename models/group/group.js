@@ -54,5 +54,6 @@ module.exports = class Group extends Sequelize.Model {
       sourceKey: 'id',
     });
     this.hasMany(db.JoinGroup, { foreignKey: 'groupId', sourceKey: 'id' });
+    this.hasMany(db.Qna, { foreignKey: 'groupId', sourceKey: 'id' });
   }
 };
