@@ -54,6 +54,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     secret: process.env.COOKIE_SECRET,
+    proxy: true,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'development' ? false : true,
