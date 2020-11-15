@@ -56,9 +56,9 @@ app.use(
     secret: process.env.COOKIE_SECRET,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'development' ? false : true,
       sameSite: false,
-      maxAge: 10000 * 60 * 2,
+      maxAge: 10000 * 600 * 2,
     },
   })
 );
