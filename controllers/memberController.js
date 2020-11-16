@@ -7,7 +7,7 @@ const { Group, GroupImage, ActiveCategory } = require('../models/group');
 module.exports = class MemberController {
   static async getMyInfo(req, res) {
     try {
-      if (!req.user) return res.status(200).json(null);
+      if (!req.user) return res.status(400).json(null);
 
       const myInfo = await Member.findOne({
         where: { id: req.user.id },
