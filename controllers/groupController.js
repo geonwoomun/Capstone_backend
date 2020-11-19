@@ -24,6 +24,7 @@ module.exports = class GroupController {
           'groupIntro',
           'states',
           'location',
+          'createdAt',
         ],
         include: [
           { model: Skill, attributes: ['id', 'name'] },
@@ -67,6 +68,7 @@ module.exports = class GroupController {
           'groupIntro',
           'states',
           'location',
+          'createdAt',
         ],
         include: [
           {

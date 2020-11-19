@@ -46,6 +46,7 @@ module.exports = class RecruitController {
               'memberCount',
               'groupIntro',
               'location',
+              'createdAt',
             ],
             include: [
               {
@@ -119,6 +120,7 @@ module.exports = class RecruitController {
                   'memberCount',
                   'groupIntro',
                   'location',
+                  'createdAt',
                 ],
                 include: [
                   {
